@@ -1,0 +1,11 @@
+﻿{
+  "Updater": {
+    "program": "{ib}\n{ia}"
+  },
+  "Value<Int>": {
+    "program": "{ib}\n{i}{Out:0} = {Arg:0}\n{ia}"
+  },
+  "DebugText": {
+    "program": "{ib}\n{i}print({In:0})\n{ia}"
+  }
+}

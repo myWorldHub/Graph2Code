@@ -79,6 +79,7 @@ namespace Graph2Code
                 if (!variables.ContainsKey(another.TypeResolver))
                 {
                     //TODO Processチェックするべき
+                    //Console.WriteLine("Check" + another.TypeResolver.GetHashCode());
                     before.Add(Run(another.Graph, variables, false));
                 }
 
@@ -115,6 +116,7 @@ namespace Graph2Code
                 if (!useStream)
                 {
                     varName = CreateVariableName(resolver.ItemName);
+                    //Console.WriteLine("Create New Variable " + varName);
                 }
 
                 //登録
@@ -165,10 +167,11 @@ namespace Graph2Code
             return name + "_" + RandomString(5);
         }
 
+        private static Random rand = new Random();
+
         static string RandomString(int count)
         {
             var root = "abcdefghijklmnopqrstuvwxyz0123456789";
-            var rand = new Random();
 
             var result = "";
             for(int i = 0; i < count; i++)

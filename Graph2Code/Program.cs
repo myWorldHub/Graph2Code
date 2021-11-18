@@ -1,6 +1,7 @@
 ﻿using GraphConnectEngine;
 using GraphConnectEngine.Graphs;
 using GraphConnectEngine.Graphs.Event;
+using GraphConnectEngine.Graphs.Operator;
 using GraphConnectEngine.Graphs.Value;
 using GraphConnectEngine.Nodes;
 using System;
@@ -14,6 +15,10 @@ namespace Graph2Code
     {
         public static void Main(string[] args)
         {
+
+            //Logger.LogLevel = Logger.LevelDebug;
+            //Logger.SetLogMethod(msg => Console.WriteLine(msg));
+
             var gen = new SequentialCodeGenerator();
             LoadRule(gen);
 
@@ -32,10 +37,14 @@ namespace Graph2Code
             {
                 return Task.FromResult(true);
             });
-            var valueInt = new ValueGraph<int>(conn, 1);
+            var valueInt1 = new ValueGraph<int>(conn, 1);
+            var valueInt2 = new ValueGraph<int>(conn, 5);
+            var addition = new AdditionOperatorGraph(conn);
 
             conn.ConnectNode(updater.OutProcessNodes[0], debugText.InProcessNodes[0]);
-            conn.ConnectNode(valueInt.OutItemNodes[0], debugText.InItemNodes[0]);
+            conn.ConnectNode(valueInt1.OutItemNodes[0], addition.InItemNodes[0]);
+            conn.ConnectNode(valueInt2.OutItemNodes[0], addition.InItemNodes[1]);
+            conn.ConnectNode(addition.OutItemNodes[0], debugText.InItemNodes[0]);
 
             return updater;
         }
@@ -84,7 +93,36 @@ namespace Graph2Code
                     }
                 }
 
+                //Console.WriteLine(graph.GetHashCode() + ":" + outVar[0]);
+
                 list.Add($"{outVar[0]} = {graph.Value}");
+
+                if (after.Count > 0)
+                {
+                    foreach (var v in after)
+                    {
+                        if (v.Count == 0) continue;
+                        list.AddRange(v.Select(s => indent + s));
+                    }
+                }
+
+                return list;
+            });
+
+            gen.Register<AdditionOperatorGraph>((graph, before, after, inVar, outVar) =>
+            {
+                var list = new List<string>();
+
+                if (before.Count > 0)
+                {
+                    foreach (var v in before)
+                    {
+                        if (v.Count == 0) continue;
+                        list.AddRange(v);
+                    }
+                }
+
+                list.Add($"{outVar[0]} = {inVar[0]} + {inVar[1]}");
 
                 if (after.Count > 0)
                 {

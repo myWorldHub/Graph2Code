@@ -11,6 +11,8 @@ namespace Graph2Code
 
         private GeneratorSetting _setting;
 
+        private IDictionary<string, int> _nameCounts = new Dictionary<string,int>();
+
         public SequentialCodeGenerator(GeneratorSetting setting)
         {
             _setting = setting;
@@ -23,7 +25,7 @@ namespace Graph2Code
         /// <returns></returns>
         public string Generate(UpdaterGraph updater)
         {
-            return _setting.Comment(_setting.Name + " / Setting Version:" + _setting.Version) + "\n" + Run(updater, new Dictionary<IItemTypeResolver, string>());
+            return Run(updater, new Dictionary<IItemTypeResolver, string>());
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace Graph2Code
                     {
                         //TODO default
                         before += "/*TODO*/";
-                        inVariables.Add(_setting.CreateVariable(node.TypeResolver.ItemName));
+                        inVariables.Add(CreateVariable(node.TypeResolver.ItemName));
                         continue;
                     }
                     else
@@ -100,7 +102,7 @@ namespace Graph2Code
                 //新しく変数を生成する
                 if (!useStream)
                 {
-                    varName = _setting.CreateVariable(resolver.ItemName);
+                    varName = CreateVariable(resolver.ItemName);
                     //Console.WriteLine("Create New Variable " + varName);
                 }
 
@@ -125,8 +127,20 @@ namespace Graph2Code
                 }
             }
 
-
             return _setting.Format(graph.GraphName,inVariables,outVariables,graph.GetArgs(),before,after);
+        }
+
+        private string CreateVariable(string name)
+        {
+            var formatter = _setting.GetVariableFormat(name);
+            
+            if (!_nameCounts.ContainsKey(name))
+            {
+                _nameCounts[name] = 0;
+            }
+            _nameCounts[name]++;
+
+            return formatter(_nameCounts[name]);
         }
     }
 }

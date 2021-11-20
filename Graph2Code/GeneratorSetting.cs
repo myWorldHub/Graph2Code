@@ -21,18 +21,18 @@ namespace Graph2Code
             Name = "Python3",
             Settings = new Dictionary<string, string>
                 {
-                    { "Mode","Sequential" },
-                    { "Indent","  " },
-                    { "Variable","Lower"},
-                    { "Comment", "# {0}\n" },
-                    { "ErrorLevel","0" }
+                    { "Mode",           "Sequential" },
+                    { "Indent",         "  " },
+                    { "VariableNaming", "{name}{count}"},
+                    { "Comment",        "# {0}\n" },
+                    { "ErrorLevel",     "0" }
                 },
             Programs = new Dictionary<string, string>
                 {
-                    { "Updater","if __name__ == \"__main__\":\n{ia}" },
-                    { "Value<Int32>","{Out:0} = {Args:0}\n{a}" },
-                    { "AdditionOperator","{b}{Out:0} = {In:0} + {In:1}\n{a}" },
-                    { "DebugText","{b}print({In:0})\n{a}" }
+                    { "Updater",            "if __name__ == \"__main__\":\n{ia}" },
+                    { "Value<Int32>",       "{Out:0} = {Args:0}\n{a}" },
+                    { "AdditionOperator",   "{b}{Out:0} = {In:0} + {In:1}\n{a}" },
+                    { "DebugText",          "{b}print({In:0})\n{a}" }
                 }
         };
 
@@ -42,11 +42,7 @@ namespace Graph2Code
 
         private string _commentFormat;
 
-        //TODO キャメルケースとかを指定できるように
-        //TODO 命名もformatにしたい
-        private Func<string, string> _variableFormat;
-
-        private static Random rand = new Random();
+        private string _variableFormat;
 
         public string Format(string id, IList<string> inItems, IList<string> outItems, IList<string> args, string before, string after)
         {
@@ -122,19 +118,15 @@ namespace Graph2Code
             _indent = Settings.ContainsKey("Indent") ? Settings["Indent"] : "";
             _commentFormat = Settings.ContainsKey("Comment") ? Settings["Comment"] : "";
 
-            //Variable case
-            switch (Settings.ContainsKey("Variable") ? Settings["Variable"] : "default")
-            {
-                case "Lower":
-                    _variableFormat = str => str.ToLower();
-                    break;
-                case "Upper":
-                    _variableFormat = str => str.ToUpper();
-                    break;
-                default:
-                    _variableFormat = str => str;
-                    break;
-            }
+            //Variable naming
+            _variableFormat = (Settings.ContainsKey("VariableNaming") ? Settings["VariableNaming"] : "{name}_{random}")
+                    .Replace("{name}", "{0}")
+                    .Replace("{Name}", "{1}")
+                    .Replace("{NAME}", "{2}")
+                    .Replace("{random}", "{3}")
+                    .Replace("{RANDOM}", "{4}")
+                    .Replace("{count}", "{5}");
+            //TODO 間違った書き方をすると、String.Formatでエラーがでてしまう
         }
 
         public string Comment(string str)
@@ -149,10 +141,21 @@ namespace Graph2Code
             return str.Split('\n').Select(s => _indent + s).Join("\n");
         }
 
-        public string CreateVariable(string name)
+        //カウントを受け取ってフォーマット済みStringを返す関数を返す
+        public Func<int,string> GetVariableFormat(string name)
         {
             LoadSetting();
-            return _variableFormat(name + "_" + RandomString(5));
+
+            var lower = name.ToLower();
+            var camel = name; // TODO 必ずCamelCaseにする
+            var upper = name.ToUpper();
+
+            return (int count) =>
+            {
+                var rand = "abcdefghijklmnopqrstuvwxyz0123456789".Random(5);
+                var RAND = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".Random(5);
+                return string.Format(_variableFormat, lower, camel, upper, rand, RAND, count);
+            };
         }
 
         private string GetItem(string id, IList<string> sp, IList<string> items)
@@ -179,19 +182,6 @@ namespace Graph2Code
                     throw new Exception($"Failed to parse int : {sp[1]} in {id}");
                 }
             }
-        }
-
-        private static string RandomString(int count)
-        {
-            var root = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-            var result = "";
-            for (int i = 0; i < count; i++)
-            {
-                result += root[rand.Next(root.Length)];
-            }
-
-            return result;
         }
 
     }

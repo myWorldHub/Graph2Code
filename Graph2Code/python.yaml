@@ -1,1 +1,29 @@
-﻿
+﻿version: 0
+name: Python3
+settings:
+  Mode: Sequential
+  Indent: '  '
+  Comment: >
+    # {0}
+  ErrorLevel: 0
+programs:
+  Updater: >-
+    if __name__ == "__main__":
+
+    {ib}
+  Value<System.Int32>: >-
+    {Out:0} = {Args:0}
+
+    {b}
+  AdditionOperator: >-
+    {a}
+
+    {Out:0} = {In:0} + {In:1}
+
+    {b}
+  DebugText: >-
+    {a}
+
+    print({In:0})
+
+    {b}

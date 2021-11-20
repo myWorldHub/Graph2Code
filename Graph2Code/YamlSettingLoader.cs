@@ -16,13 +16,13 @@ namespace Graph2Code
             return deserializer.Deserialize<GeneratorSetting>(File.ReadAllText(path));
         }
 
-        public void CreateSample(string path)
+        public string Encode(GeneratorSetting setting)
         {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             var yaml = serializer.Serialize(GeneratorSetting.Sample);
-            File.WriteAllText(path, yaml);
+            return yaml;
         }
     }
 }

@@ -10,6 +10,6 @@ namespace Graph2Code
     {
         public GeneratorSetting Load(string path);
 
-        public void CreateSample(string path);
+        public string Encode(GeneratorSetting setting);
     }
 }

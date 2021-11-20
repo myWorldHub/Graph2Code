@@ -16,6 +16,9 @@ namespace Graph2Code
             //Logger.LogLevel = Logger.LevelDebug;
             //Logger.SetLogMethod(msg => Console.WriteLine(msg));
 
+            // System.IO.File.WriteAllText("python.yaml",new YamlSettingLoader().Encode(GeneratorSetting.Sample));
+            // Environment.Exit(0);
+
             var gen = new SequentialCodeGenerator(GeneratorSetting.Sample);
 
             var result = gen.Generate(CreateTestGraph());
